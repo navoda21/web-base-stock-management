@@ -1,1 +1,0 @@
-# web-base-stock-management
