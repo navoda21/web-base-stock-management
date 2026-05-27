@@ -1,0 +1,174 @@
+/* Enhanced Sidebar styles */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 60px;
+    --transition-speed: 0.3s;
+}
+
+.sidebar {
+    min-height: 100vh;
+    width: var(--sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--dark-color) 100%);
+    color: white;
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1030;
+    transition: width var(--transition-speed) ease;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-brand {
+    color: white;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-brand i {
+    font-size: 1.75rem;
+    margin-right: 10px;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 14px 20px;
+    border-radius: 0;
+    transition: all var(--transition-speed) ease;
+    font-size: 1.05rem;
+    border-left: 4px solid transparent;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(var(--secondary-color-rgb), 0.3);
+    border-left-color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.sidebar .nav-link i {
+    margin-right: 12px;
+    width: 22px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.sidebar .nav-item {
+    margin-bottom: 2px;
+}
+
+.sidebar .nav-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 15px 0;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 0;
+    margin-top: auto;
+}
+
+.logout-btn {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    padding: 10px 20px;
+    transition: all var(--transition-speed) ease;
+}
+
+.logout-btn:hover {
+    background-color: rgba(var(--danger-color-rgb), 0.3);
+    color: white;
+}
+
+/* Main content adjustment to account for sidebar */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 15px;
+    transition: margin-left var(--transition-speed) ease;
+    max-width: calc(100vw - var(--sidebar-width));
+    overflow-x: hidden;
+}
+
+/* Coming soon tag styling */
+.coming-soon-tag {
+    font-size: 0.75rem;
+    background-color: rgba(var(--warning-color-rgb), 0.3);
+    color: var(--warning-color);
+    border-radius: 12px;
+    padding: 2px 8px;
+    margin-left: 8px;
+}
+
+/* CSS Variables for RGB values needed for rgba */
+:root {
+    --primary-color-rgb: 44, 62, 80;
+    --secondary-color-rgb: 52, 152, 219;
+    --success-color-rgb: 39, 174, 96;
+    --danger-color-rgb: 231, 76, 60;
+    --warning-color-rgb: 243, 156, 18;
+    --info-color-rgb: 23, 162, 184;
+}
+
+/* Responsive sidebar behavior */
+@media (max-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar .nav-link span,
+    .sidebar-brand span {
+        display: none;
+    }
+
+    .sidebar .nav-link i {
+        margin-right: 0;
+        font-size: 1.3rem;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+        max-width: calc(100vw - var(--sidebar-collapsed-width));
+        padding: 10px;
+    }
+
+    .sidebar.expanded {
+        width: var(--sidebar-width);
+    }
+
+    .sidebar.expanded .nav-link span,
+    .sidebar.expanded .sidebar-brand span {
+        display: inline;
+    }
+
+    .sidebar.expanded .nav-link i {
+        margin-right: 12px;
+    }
+}

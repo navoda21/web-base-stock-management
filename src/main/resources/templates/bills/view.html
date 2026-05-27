@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link th:href="@{/css/form-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="bg-animation"></div>
+
+<div class="container-fluid">
+    <div class="form-container" style="max-width: 1000px;">
+        <div class="form-header">
+            <div class="user-view-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <h2>Bill Details</h2>
+            <p>Invoice and payment information</p>
+        </div>
+
+        <div class="info-card">
+            <!-- Bill Information -->
+            <h5><i class="fas fa-file-invoice me-2"></i>Bill Information</h5>
+            <div class="info-row">
+                <span class="info-label">Bill Number:</span>
+                <span class="info-value" th:text="${bill.billNumber}">BILL-001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Bill Date:</span>
+                <span class="info-value"
+                      th:text="${bill.billDate != null ? #temporals.format(bill.billDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Jan 15, 2024 10:30</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                        <span class="badge"
+                              th:classappend="${bill.status != null and bill.status.name() == 'PAID' ? 'badge-success' : 
+                                             bill.status != null and bill.status.name() == 'PENDING' ? 'badge-warning' :
+                                             bill.status != null and bill.status.name() == 'PARTIAL' ? 'badge-info' : 'badge-danger'}"
+                              th:text="${bill.status != null ? bill.status : 'N/A'}">PAID</span>
+                    </span>
+            </div>
+
+            <!-- Customer Information -->
+            <h5 class="mt-4"><i class="fas fa-user-friends me-2"></i>Customer Information</h5>
+            <div class="info-row" th:if="${bill.customer != null}">
+                <span class="info-label">Customer Name:</span>
+                <span class="info-value"
+                      th:text="${bill.customer.firstName + ' ' + bill.customer.lastName}">John Doe</span>
+            </div>
+            <div class="info-row" th:if="${bill.customer != null}">
+                <span class="info-label">Customer Email:</span>
+                <span class="info-value" th:text="${bill.customer.email}">john@example.com</span>
+            </div>
+            <div class="info-row" th:if="${bill.customer != null}">
+                <span class="info-label">Customer Phone:</span>
+                <span class="info-value" th:text="${bill.customer.phone}">+1234567890</span>
+            </div>
+            <div class="info-row" th:if="${bill.customer == null}">
+                <span class="info-label">Customer:</span>
+                <span class="info-value">Walk-in Customer</span>
+            </div>
+
+            <!-- Billing Details -->
+            <h5 class="mt-4"><i class="fas fa-calculator me-2"></i>Billing Details</h5>
+            <div class="info-row">
+                <span class="info-label">Subtotal:</span>
+                <span class="info-value">$<span
+                        th:text="${bill.subtotalAmount != null ? #numbers.formatDecimal(bill.subtotalAmount, 1, 2) : '0.00'}">100.00</span></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tax Amount:</span>
+                <span class="info-value">$<span
+                        th:text="${bill.taxAmount != null ? #numbers.formatDecimal(bill.taxAmount, 1, 2) : '0.00'}">10.00</span></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><strong>Total Amount:</strong></span>
+                <span class="info-value"><strong>$<span
+                        th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 1, 2) : '0.00'}">110.00</span></strong></span>
+            </div>
+
+            <!-- Payment Information -->
+            <h5 class="mt-4"><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+            <div class="info-row">
+                <span class="info-label">Payment Method:</span>
+                <span class="info-value"
+                      th:text="${bill.paymentMethod != null ? bill.paymentMethod : 'N/A'}">CASH</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Amount Paid:</span>
+                <span class="info-value">$<span
+                        th:text="${bill.amountPaid != null ? #numbers.formatDecimal(bill.amountPaid, 1, 2) : '0.00'}">110.00</span></span>
+            </div>
+            <div class="info-row" th:if="${bill.paymentReference != null and !bill.paymentReference.isEmpty()}">
+                <span class="info-label">Payment Reference:</span>
+                <span class="info-value" th:text="${bill.paymentReference}">TXN123456</span>
+            </div>
+
+            <!-- Bill Items (if available) -->
+            <div th:if="${bill.items != null and !bill.items.isEmpty()}">
+                <h5 class="mt-4"><i class="fas fa-shopping-cart me-2"></i>Bill Items</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered"
+                           style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                        <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${bill.items}">
+                            <td th:text="${item.product != null ? item.product.name : 'N/A'}">Item Name</td>
+                            <td th:text="${item.quantity != null ? item.quantity : 0}">1</td>
+                            <td>$<span
+                                    th:text="${item.unitPrice != null ? #numbers.formatDecimal(item.unitPrice, 1, 2) : '0.00'}">10.00</span>
+                            </td>
+                            <td>$<span
+                                    th:text="${item.totalPrice != null ? #numbers.formatDecimal(item.totalPrice, 1, 2) : '0.00'}">10.00</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div th:if="${bill.notes != null and !bill.notes.isEmpty()}">
+                <h5 class="mt-4"><i class="fas fa-sticky-note me-2"></i>Notes</h5>
+                <div class="info-row">
+                    <span class="info-value" th:text="${bill.notes}">Bill notes here</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions mt-4">
+                <a th:href="@{/bills/edit/{id}(id=${bill.id})}" class="btn btn-modern"
+                   th:if="${bill.status != null and bill.status.name() != 'CANCELLED'}">
+                    <i class="fas fa-edit me-2"></i>Edit Bill
+                </a>
+                <button type="button" class="btn btn-info-modern" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i>Print Invoice
+                </button>
+                <a th:href="@{/bills}" class="btn btn-secondary-modern">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

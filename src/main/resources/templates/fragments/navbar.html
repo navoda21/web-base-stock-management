@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Modern Unified Navigation Bar -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-gradient-primary sticky-top shadow-sm">
+    <div class="container-fluid">
+        <!-- Brand Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+            <i class="fas fa-boxes me-2"></i>
+            <span class="fw-bold">Stock Management</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navigation Content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Main Navigation Links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}"
+                       href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                    </a>
+                </li>
+
+                <!-- Inventory Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="inventoryDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"
+                       th:classappend="${activeTab == 'inventory' || activeTab == 'items' ? 'active' : ''}">
+                        <i class="fas fa-boxes me-1"></i> Inventory
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-custom" aria-labelledby="inventoryDropdown">
+                        <li><a class="dropdown-item" href="/items/dashboard">
+                            <i class="fas fa-chart-line me-2"></i> Inventory Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="/items">
+                            <i class="fas fa-list me-2"></i> All Items
+                        </a></li>
+                        <li><a class="dropdown-item" href="/items/add">
+                            <i class="fas fa-plus-circle me-2"></i> Add New Item
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- Sales & Marketing Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="salesDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"
+                       th:classappend="${activeTab == 'bills' || activeTab == 'promotions' || activeTab == 'discounts' ? 'active' : ''}">
+                        <i class="fas fa-shopping-cart me-1"></i> Sales & Marketing
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-custom" aria-labelledby="salesDropdown">
+                        <li><a class="dropdown-item" href="/bills">
+                            <i class="fas fa-file-invoice-dollar me-2"></i> Bills
+                        </a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/promotions">
+                            <i class="fas fa-bullhorn me-2"></i> Promotions
+                        </a></li>
+                        <li><a class="dropdown-item" href="/discounts">
+                            <i class="fas fa-percentage me-2"></i> Discounts
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- People Management Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="peopleDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"
+                       th:classappend="${activeTab == 'customers' || activeTab == 'staff' || activeTab == 'users' || activeTab == 'suppliers' ? 'active' : ''}">
+                        <i class="fas fa-users me-1"></i> People
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-custom" aria-labelledby="peopleDropdown">
+                        <li><a class="dropdown-item" href="/customers">
+                            <i class="fas fa-user-friends me-2"></i> Customers
+                        </a></li>
+                        <li><a class="dropdown-item" href="/suppliers">
+                            <i class="fas fa-truck me-2"></i> Suppliers
+                        </a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/staff">
+                            <i class="fas fa-user-tie me-2"></i> Staff
+                        </a></li>
+                        <li><a class="dropdown-item" href="/users">
+                            <i class="fas fa-users-cog me-2"></i> User Management
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports (Coming Soon) -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports">
+                        <i class="fas fa-chart-bar me-1"></i> Reports
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Side Navigation -->
+            <ul class="navbar-nav ms-auto">
+                <!-- Notifications -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                            3
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom notification-dropdown"
+                        aria-labelledby="notificationsDropdown">
+                        <li class="dropdown-header">
+                            <strong>Notifications</strong>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item notification-item" href="#">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Low Stock Alert</strong>
+                                <p class="mb-0 small text-muted">5 items need restocking</p>
+                            </div>
+                        </a></li>
+                        <li><a class="dropdown-item notification-item" href="#">
+                            <i class="fas fa-user-plus text-success me-2"></i>
+                            <div>
+                                <strong>New Customer</strong>
+                                <p class="mb-0 small text-muted">John Doe registered</p>
+                            </div>
+                        </a></li>
+                        <li><a class="dropdown-item notification-item" href="#">
+                            <i class="fas fa-file-invoice text-info me-2"></i>
+                            <div>
+                                <strong>New Order</strong>
+                                <p class="mb-0 small text-muted">Order #12345 created</p>
+                            </div>
+                        </a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-center small" href="#">View All Notifications</a></li>
+                    </ul>
+                </li>
+
+                <!-- Search -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#searchModal">
+                        <i class="fas fa-search"></i>
+                    </a>
+                </li>
+
+                <!-- User Profile Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-avatar me-2">
+                            <i class="fas fa-user-circle fa-lg"></i>
+                        </div>
+                        <span class="d-none d-lg-inline" sec:authentication="name">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userDropdown">
+                        <li class="dropdown-header">
+                            <strong sec:authentication="name">Admin User</strong>
+                            <p class="mb-0 small text-muted" sec:authentication="principal.authorities">Role: ADMIN</p>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/profile">
+                            <i class="fas fa-user me-2"></i> My Profile
+                        </a></li>
+                        <li><a class="dropdown-item" href="/settings">
+                            <i class="fas fa-cog me-2"></i> Settings
+                        </a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="px-3">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}"/>
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Search Modal -->
+<div th:fragment="search-modal" class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title mb-3" id="searchModalLabel">
+                    <i class="fas fa-search me-2"></i> Quick Search
+                </h5>
+                <input type="text" class="form-control form-control-lg"
+                       placeholder="Search for items, customers, orders..."
+                       id="globalSearch" autofocus>
+                <div id="searchResults" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar Styles -->
+<style th:fragment="navbar-styles">
+    :root {
+        --navbar-height: 60px;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .navbar {
+        height: var(--navbar-height);
+        padding: 0.5rem 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: white !important;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        transform: scale(1.05);
+    }
+
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .navbar-nav .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white !important;
+    }
+
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+    }
+
+    .navbar-nav .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 3px;
+        background-color: white;
+        border-radius: 2px 2px 0 0;
+    }
+
+    /* Dropdown Customization */
+    .dropdown-menu-custom {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dropdown-menu-custom .dropdown-item {
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .dropdown-menu-custom .dropdown-item:hover {
+        background-color: #f0f0f0;
+        transform: translateX(5px);
+    }
+
+    .dropdown-menu-custom .dropdown-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .dropdown-header {
+        font-weight: 600;
+        color: #495057;
+        padding: 0.5rem 1rem;
+    }
+
+    /* Notification Badge */
+    .notification-badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    /* Notification Dropdown */
+    .notification-dropdown {
+        width: 350px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: start;
+        padding: 0.75rem 1rem;
+    }
+
+    .notification-item i {
+        font-size: 1.2rem;
+        margin-top: 0.2rem;
+    }
+
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* User Avatar */
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 991px) {
+        .navbar-collapse {
+            background-color: rgba(102, 126, 234, 0.95);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .navbar-nav .nav-link.active::after {
+            display: none;
+        }
+
+        .notification-dropdown {
+            width: 100%;
+        }
+    }
+
+    /* Content spacing to account for fixed navbar */
+    body {
+        padding-top: var(--navbar-height);
+    }
+
+    /* Search Modal */
+    #searchResults {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+
+<!-- Navbar Scripts -->
+<script th:fragment="navbar-scripts">
+    // Global search functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function (e) {
+                const query = e.target.value;
+                if (query.length >= 2) {
+                    // TODO: Implement actual search functionality
+                    searchResults.innerHTML = `
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-box me-2"></i> Search results for "${query}"
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action text-muted">
+                                <i class="fas fa-search me-2"></i> No results found
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    searchResults.innerHTML = '';
+                }
+            });
+        }
+
+        // Close navbar collapse on mobile when clicking outside
+        document.addEventListener('click', function (e) {
+            const navbar = document.querySelector('.navbar-collapse');
+            const toggler = document.querySelector('.navbar-toggler');
+
+            if (navbar && navbar.classList.contains('show')) {
+                if (!navbar.contains(e.target) && !toggler.contains(e.target)) {
+                    const bsCollapse = new bootstrap.Collapse(navbar, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

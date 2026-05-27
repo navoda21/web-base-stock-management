@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity - Stock Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .activity-item {
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .activity-item.login {
+            border-left-color: #28a745;
+        }
+
+        .activity-item.logout {
+            border-left-color: #dc3545;
+        }
+
+        .activity-item.create {
+            border-left-color: #17a2b8;
+        }
+
+        .activity-item.update {
+            border-left-color: #ffc107;
+        }
+
+        .activity-item.delete {
+            border-left-color: #6f42c1;
+        }
+
+        .user-selector {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-user text-primary"></i> User Activity</h1>
+                <div>
+                    <a href="/admin/reports" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Selector -->
+    <div class="user-selector">
+        <form method="get" action="/admin/reports/user-activity">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="userId" class="form-label">Select User</label>
+                    <select name="userId" id="userId" class="form-select">
+                        <option value="">All Users</option>
+                        <!-- This would be populated with actual users from the database -->
+                        <option value="1">admin</option>
+                        <option value="2">user1</option>
+                        <option value="3">user2</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <a href="/admin/reports/user-activity" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- User Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-history"></i> User Activity</h5>
+                    <span class="badge bg-primary" th:text="${userActivity.totalElements} + ' total'">0 total</span>
+                </div>
+                <div class="card-body">
+                    <div th:if="${userActivity != null and !userActivity.empty}">
+                        <div th:each="log : ${userActivity.content}"
+                             th:class="'activity-item ' + ${log.actionType.name().toLowerCase()}"
+                             class="activity-item">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                            <span th:class="'badge bg-' + ${log.actionType.name().toLowerCase() == 'login' ? 'success' : (log.actionType.name().toLowerCase() == 'logout' ? 'danger' : (log.actionType.name().toLowerCase() == 'create' ? 'info' : (log.actionType.name().toLowerCase() == 'update' ? 'warning' : 'secondary')))}"
+                                                  th:text="${log.actionType.name()}">ACTION</span>
+                                        <span th:if="${log.tableName != null}"
+                                              class="badge bg-light text-dark ms-2"
+                                              th:text="${log.tableName}">table</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong th:if="${log.user != null}"
+                                                th:text="${log.user.username}">Username</strong>
+                                        <span th:if="${log.user == null}" class="text-muted">System</span>
+                                        <span th:if="${log.recordId != null}"
+                                              th:text="' (Record ID: ' + ${log.recordId} + ')'"> (Record ID: 123)</span>
+                                    </div>
+                                    <div th:if="${log.oldValues != null or log.newValues != null}" class="small">
+                                        <div th:if="${log.oldValues != null}" class="text-muted">
+                                            <strong>Old Values:</strong> <code th:text="${log.oldValues}">old
+                                            data</code>
+                                        </div>
+                                        <div th:if="${log.newValues != null}" class="text-success">
+                                            <strong>New Values:</strong> <code th:text="${log.newValues}">new
+                                            data</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="text-muted small">
+                                        <i class="fas fa-clock"></i>
+                                        <span th:text="${#temporals.format(log.createdAt, 'MMM dd, yyyy HH:mm:ss')}">Jan 01, 2024 12:00:00</span>
+                                    </div>
+                                    <div th:if="${log.ipAddress != null}" class="text-muted small">
+                                        <i class="fas fa-globe"></i> <span th:text="${log.ipAddress}">192.168.1.1</span>
+                                    </div>
+                                    <div th:if="${log.userAgent != null}" class="text-muted small"
+                                         style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <i class="fas fa-desktop"></i> <span
+                                            th:text="${log.userAgent}">User Agent</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav th:if="${userActivity.totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${!userActivity.hasPrevious()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/user-activity(page=${userActivity.number - 1}, userId=${selectedUserId})}">Previous</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, userActivity.totalPages - 1)}"
+                                    th:classappend="${i == userActivity.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/user-activity(page=${i}, userId=${selectedUserId})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${!userActivity.hasNext()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/user-activity(page=${userActivity.number + 1}, userId=${selectedUserId})}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div th:if="${userActivity == null or userActivity.empty}" class="text-center text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No user activity found</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

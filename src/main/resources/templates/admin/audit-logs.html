@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Stock Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .log-entry {
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .log-entry.login {
+            border-left-color: #28a745;
+        }
+
+        .log-entry.logout {
+            border-left-color: #dc3545;
+        }
+
+        .log-entry.create {
+            border-left-color: #17a2b8;
+        }
+
+        .log-entry.update {
+            border-left-color: #ffc107;
+        }
+
+        .log-entry.delete {
+            border-left-color: #6f42c1;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .badge-action {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-list-alt text-primary"></i> Audit Logs</h1>
+                <div>
+                    <a href="/admin/reports" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" action="/admin/reports/audit-logs">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="actionType" class="form-label">Action Type</label>
+                    <select name="actionType" id="actionType" class="form-select">
+                        <option value="">All Actions</option>
+                        <option th:each="action : ${actionTypes}"
+                                th:value="${action.name()}"
+                                th:text="${action.name()}"
+                                th:selected="${action == currentActionType}">Action
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="tableName" class="form-label">Table Name</label>
+                    <input type="text" name="tableName" id="tableName" class="form-control"
+                           th:value="${currentTableName}" placeholder="Enter table name">
+                </div>
+                <div class="col-md-2">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="datetime-local" name="startDate" id="startDate" class="form-control"
+                           th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd\'T\'HH:mm') : ''}">
+                </div>
+                <div class="col-md-2">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="datetime-local" name="endDate" id="endDate" class="form-control"
+                           th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd\'T\'HH:mm') : ''}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Audit Logs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-history"></i> Audit Logs</h5>
+                    <span class="badge bg-primary" th:text="${auditLogs.totalElements} + ' total'">0 total</span>
+                </div>
+                <div class="card-body">
+                    <!-- Error Message -->
+                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span th:text="${errorMessage}">Error message</span>
+                    </div>
+
+                    <div th:if="${auditLogs != null && !auditLogs.empty}">
+                        <div th:each="log : ${auditLogs.content}"
+                             th:with="action=${log.actionType != null ? log.actionType.name().toLowerCase() : 'unknown'}"
+                             th:class="${'log-entry ' + action}"
+                             class="log-entry">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div th:switch="${action}">
+                                            <span th:case="'login'" class="badge badge-action bg-success"
+                                                  th:text="${log.actionType.name()}">ACTION</span>
+                                            <span th:case="'logout'" class="badge badge-action bg-danger"
+                                                  th:text="${log.actionType.name()}">ACTION</span>
+                                            <span th:case="'create'" class="badge badge-action bg-info"
+                                                  th:text="${log.actionType.name()}">ACTION</span>
+                                            <span th:case="'update'" class="badge badge-action bg-warning"
+                                                  th:text="${log.actionType.name()}">ACTION</span>
+                                            <span th:case="*" class="badge badge-action bg-secondary"
+                                                  th:text="${log.actionType != null ? log.actionType.name() : 'UNKNOWN'}">ACTION</span>
+                                        </div>
+                                        <span th:if="${log.tableName != null}"
+                                              class="badge bg-light text-dark ms-2"
+                                              th:text="${log.tableName}">table</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong th:if="${log.user != null}"
+                                                th:text="${log.user.username}">Username</strong>
+                                        <span th:if="${log.user == null}" class="text-muted">System</span>
+                                        <span th:if="${log.recordId != null}"
+                                              th:text="' (Record ID: ' + ${log.recordId} + ')'"> (Record ID: 123)</span>
+                                    </div>
+                                    <div th:if="${log.oldValues != null || log.newValues != null}" class="small">
+                                        <div th:if="${log.oldValues != null}" class="text-muted">
+                                            <strong>Old Values:</strong> <code th:text="${log.oldValues}">old
+                                            data</code>
+                                        </div>
+                                        <div th:if="${log.newValues != null}" class="text-success">
+                                            <strong>New Values:</strong> <code th:text="${log.newValues}">new
+                                            data</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="text-muted small">
+                                        <i class="fas fa-clock"></i>
+                                        <span th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'MMM dd, yyyy HH:mm:ss') : ''}">Jan 01, 2024 12:00:00</span>
+                                    </div>
+                                    <div th:if="${log.ipAddress != null}" class="text-muted small">
+                                        <i class="fas fa-globe"></i> <span th:text="${log.ipAddress}">192.168.1.1</span>
+                                    </div>
+                                    <div th:if="${log.userAgent != null}" class="text-muted small"
+                                         style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <i class="fas fa-desktop"></i> <span
+                                            th:text="${log.userAgent}">User Agent</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav th:if="${auditLogs.totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${!auditLogs.hasPrevious()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/audit-logs(page=${auditLogs.number - 1}, actionType=${currentActionType != null ? currentActionType : ''}, tableName=${currentTableName != null ? currentTableName : ''}, startDate=${startDate != null ? startDate : ''}, endDate=${endDate != null ? endDate : ''})}">Previous</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, auditLogs.totalPages - 1)}"
+                                    th:classappend="${i == auditLogs.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/audit-logs(page=${i}, actionType=${currentActionType != null ? currentActionType : ''}, tableName=${currentTableName != null ? currentTableName : ''}, startDate=${startDate != null ? startDate : ''}, endDate=${endDate != null ? endDate : ''})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${!auditLogs.hasNext()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/reports/audit-logs(page=${auditLogs.number + 1}, actionType=${currentActionType != null ? currentActionType : ''}, tableName=${currentTableName != null ? currentTableName : ''}, startDate=${startDate != null ? startDate : ''}, endDate=${endDate != null ? endDate : ''})}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div th:if="${auditLogs == null || auditLogs.empty}" class="text-center text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No audit logs found</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

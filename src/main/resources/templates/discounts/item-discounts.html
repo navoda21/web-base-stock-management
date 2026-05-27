@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>Item Discounts</title>
+    <style>
+        .discount-card {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .discount-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-percentage {
+            background-color: #28a745;
+        }
+
+        .badge-fixed {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">
+                Discounts for <span th:text="${item != null ? item.name : 'Item'}"></span>
+            </h1>
+            <div>
+                <a th:href="@{'/items/edit/' + ${item.id}}" class="btn btn-sm btn-info shadow-sm mr-2">
+                    <i class="fas fa-edit fa-sm text-white-50"></i> Edit Item
+                </a>
+                <a href="/discounts/create" class="btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Add New Discount
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Item Details Card -->
+            <div class="col-xl-4 col-md-12 mb-4" th:if="${item != null}">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Item Details
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${item.name}">Item Name
+                                </div>
+                                <div class="mt-2">
+                                    <p><strong>SKU:</strong> <span th:text="${item.sku}">SKU</span></p>
+                                    <p><strong>Regular Price:</strong> $<span
+                                            th:text="${#numbers.formatDecimal(item.price, 1, 2)}">0.00</span></p>
+                                    <p>
+                                        <strong>Current Price:</strong> $<span
+                                            th:text="${#numbers.formatDecimal(item.currentPrice, 1, 2)}">0.00</span>
+                                        <span th:if="${item.price != item.currentPrice}" class="badge badge-success">Discounted</span>
+                                    </p>
+                                    <p><strong>Stock:</strong> <span th:text="${item.quantity}">0</span> units</p>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-tag fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discounts List -->
+            <div th:class="${item != null ? 'col-xl-8 col-md-12' : 'col-12'}">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">All Discounts</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" th:if="${!discounts.empty}">
+                            <div class="col-lg-6 mb-4" th:each="discount : ${discounts}">
+                                <div class="card discount-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title m-0" th:text="${discount.name}">Discount Name</h5>
+                                        <span class="badge"
+                                              th:class="${discount.type == 'PERCENTAGE' ? 'badge badge-percentage' : 'badge badge-fixed'}"
+                                              th:text="${discount.type == 'PERCENTAGE' ? discount.value + '%' : '$' + discount.value}">
+                                                Discount Value
+                                            </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text" th:text="${discount.description}">Description</p>
+                                        <p>
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            <span th:text="${#temporals.format(discount.startDate, 'dd-MMM-yyyy')}">Start Date</span>
+                                            <span> to </span>
+                                            <span th:text="${#temporals.format(discount.endDate, 'dd-MMM-yyyy')}">End Date</span>
+                                        </p>
+                                        <p>
+                                            <span class="badge badge-info" th:if="${discount.active}">Active</span>
+                                            <span class="badge badge-secondary"
+                                                  th:unless="${discount.active}">Inactive</span>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{'/discounts/edit/' + ${discount.id}}"
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <form th:action="@{'/discounts/delete/' + ${discount.id}}" method="post"
+                                                  class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('Are you sure you want to delete this discount?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center p-4" th:if="${discounts.empty}">
+                            <i class="fas fa-percentage fa-3x text-gray-300 mb-3"></i>
+                            <p>No discounts found for this item.</p>
+                            <a href="/discounts/create" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create Discount
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

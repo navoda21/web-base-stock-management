@@ -1,0 +1,92 @@
+/* Customer View Page Styles */
+
+.profile-card {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: #fff;
+    background-color: #6c757d;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.customer-info dt {
+    font-weight: 600;
+    color: #495057;
+}
+
+.customer-info dd {
+    margin-bottom: 12px;
+}
+
+.section-divider {
+    height: 1px;
+    background-color: #dee2e6;
+    margin: 20px 0;
+}
+
+.loyalty-bar {
+    height: 25px;
+    background-color: #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loyalty-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #ff9800);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: width 0.3s ease;
+}
+
+.membership-badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+}
+
+.membership-badge-standard {
+    background-color: #6c757d;
+    color: white;
+}
+
+.membership-badge-silver {
+    background-color: #c0c0c0;
+    color: #000;
+}
+
+.membership-badge-gold {
+    background-color: #ffd700;
+    color: #000;
+}
+
+.membership-badge-platinum {
+    background-color: #e5e4e2;
+    color: #000;
+}

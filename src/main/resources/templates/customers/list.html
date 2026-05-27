@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - Stock Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        :root {
+            --bg-primary: #1a1d29;
+            --bg-secondary: #2d3142;
+            --bg-card: #252837;
+            --cyan: #00d9ff;
+            --orange: #ff9f43;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: #3d4252;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            height: 100vh;
+            background: var(--bg-secondary);
+            color: white;
+            position: fixed;
+            width: 240px;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--orange);
+        }
+
+        .sidebar .brand {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar .brand h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sidebar .nav-link {
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            margin: 3px 10px;
+            font-size: 0.9rem;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: var(--text-primary);
+            background-color: rgba(255, 165, 67, 0.15);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--orange);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            min-height: 100vh;
+            width: calc(100% - 240px);
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h5 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .content-wrapper {
+            padding: 1.25rem;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .page-header {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        .search-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .customer-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .customer-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+            box-shadow: 0 6px 12px rgba(255, 159, 67, 0.2);
+        }
+
+        .customer-img {
+            height: 120px;
+            width: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 1rem auto;
+            display: block;
+            border: 3px solid var(--border-color);
+        }
+
+        .default-avatar {
+            background: linear-gradient(135deg, var(--cyan), var(--orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .card-text {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .card-text i {
+            color: var(--orange);
+            margin-right: 5px;
+        }
+
+        .card-footer {
+            padding: 0.75rem 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .membership-badge-standard {
+            background-color: rgba(108, 117, 125, 0.3);
+            color: #9ca3af;
+        }
+
+        .membership-badge-silver {
+            background-color: rgba(173, 181, 189, 0.3);
+            color: #d1d5db;
+        }
+
+        .membership-badge-gold {
+            background-color: rgba(255, 193, 7, 0.3);
+            color: var(--yellow);
+        }
+
+        .membership-badge-platinum {
+            background-color: rgba(33, 37, 41, 0.5);
+            color: var(--cyan);
+        }
+
+        .form-control {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-control:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--orange);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(255, 159, 67, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), #0088b3);
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--cyan);
+            color: white;
+            border-color: var(--cyan);
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--red);
+            color: white;
+            border-color: var(--red);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--red), #dc2626);
+            border: none;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: 1px solid;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pagination .page-link {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            margin: 0 2px;
+            border-radius: 6px;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--bg-card);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--orange), #ff6b35);
+            border-color: var(--orange);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--border-color);
+        }
+
+        /* Switch Button Styles */
+        .btn-switch {
+            background: linear-gradient(135deg, var(--cyan), #0088b3);
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 217, 255, 0.2);
+        }
+
+        .btn-switch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 217, 255, 0.35);
+            color: white;
+        }
+
+        .btn-switch i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                min-height: auto;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .header {
+                position: relative;
+            }
+
+            .btn-switch {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Fixed Sidebar -->
+<div class="sidebar">
+    <div class="brand">
+        <h4><i class="fas fa-boxes"></i> Stock Management</h4>
+    </div>
+    <ul class="nav flex-column py-3">
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/users">
+                <i class="fas fa-users"></i> User Management
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/suppliers">
+                <i class="fas fa-truck"></i> Supplier Management
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/staff">
+                <i class="fas fa-user-tie"></i> Staff Management
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="/customers">
+                <i class="fas fa-user-friends"></i> Customers
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/bills">
+                <i class="fas fa-file-invoice-dollar"></i> Bills
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/items/dashboard">
+                <i class="fas fa-warehouse"></i> Inventory
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/promotions">
+                <i class="fas fa-tags"></i> Promotions
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/discounts">
+                <i class="fas fa-percent"></i> Discounts
+            </a>
+        </li>
+        <li class="nav-item mt-4">
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <div th:if="${_csrf != null}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </div>
+                <button type="submit" class="nav-link border-0 bg-transparent text-start w-100">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="header">
+        <h5>Customer Management</h5>
+        <div class="user-info">
+            <span>User</span>
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>Customer Management</h2>
+                    <p>View and manage all customers</p>
+                </div>
+                <div>
+                    <a th:href="@{/bills}" class="btn btn-switch me-2">
+                        <i class="fas fa-file-invoice-dollar"></i> Switch to Bills
+                    </a>
+                    <a th:href="@{/customers/create}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus-circle"></i> Add New Customer
+                    </a>
+                    <a th:href="@{/customers/reports}" class="btn btn-outline-secondary">
+                        <i class="fas fa-chart-line"></i> Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-box">
+            <form th:action="@{/customers}" method="get" class="d-flex gap-2">
+                <input type="text" name="keyword" class="form-control" placeholder="Search by name, email, or phone..."
+                       th:value="${keyword}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Customer Cards -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+            <div class="col" th:each="customer : ${customers}">
+                <div class="card customer-card h-100">
+                    <img th:if="${customer.photoUrl}" th:src="${customer.photoUrl}" class="card-img-top customer-img"
+                         alt="Customer Photo">
+                    <div th:unless="${customer.photoUrl}" class="card-img-top customer-img default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0" th:text="${customer.firstName + ' ' + customer.lastName}"></h5>
+                            <span th:if="${customer.membershipLevel}"
+                                  th:class="'badge rounded-pill membership-badge-' + ${#strings.toLowerCase(customer.membershipLevel)}"
+                                  th:text="${customer.membershipLevel}"></span>
+                        </div>
+
+                        <p th:if="${customer.customerId}" class="card-text small">
+                            <strong>ID:</strong> <span th:text="${customer.customerId}"></span>
+                        </p>
+
+                        <p class="card-text">
+                            <i class="fas fa-envelope"></i> <span th:text="${customer.email}"></span><br>
+                            <i class="fas fa-phone"></i> <span th:text="${customer.phone}"></span><br>
+                            <span th:if="${customer.address}">
+                                    <i class="fas fa-map-marker-alt"></i> 
+                                    <span th:text="${customer.address}"></span>
+                                    <span th:if="${customer.city}" th:text="${', ' + customer.city}"></span>
+                                </span>
+                        </p>
+
+                        <p th:if="${customer.loyaltyPoints}" class="card-text">
+                            <strong>Loyalty Points:</strong> <span th:text="${customer.loyaltyPoints}"></span>
+                        </p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between gap-1">
+                        <a th:href="@{/customers/view/{id}(id=${customer.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a th:href="@{/customers/edit/{id}(id=${customer.id})}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-pencil"></i> Edit
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${customer.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" th:id="'deleteModal' + ${customer.id}" tabindex="-1"
+                     aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete customer
+                                <strong th:text="${customer.firstName + ' ' + customer.lastName}"></strong>?
+                                This action cannot be undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form th:action="@{/customers/delete/{id}(id=${customer.id})}" method="post">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="text-center py-5" th:if="${#lists.isEmpty(customers)}">
+            <i class="fas fa-user-friends" style="font-size: 3rem; color: var(--text-secondary);"></i>
+            <h3 class="mt-3">No Customers Found</h3>
+            <p class="text-muted">Add your first customer to get started.</p>
+            <a th:href="@{/customers/create}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus-circle"></i> Add New Customer
+            </a>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/customers(page=${currentPage - 1}, keyword=${keyword})}"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${currentPage == i ? 'active' : ''}">
+                    <a class="page-link" th:href="@{/customers(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/customers(page=${currentPage + 1}, keyword=${keyword})}"
+                       aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!-- users/list.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Stock Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1e2230;
+            --bg-secondary: #2a2f42;
+            --bg-card: #2d3348;
+            --cyan: #fffbfb;
+            --orange: #ff9f43;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #fbbf24;
+            --text-primary: #e8eaed;
+            --text-secondary: #b0b5c0;
+            --border-color: #3d4258;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            height: 100vh;
+            background: var(--bg-secondary);
+            color: white;
+            position: fixed;
+            width: 240px;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--orange);
+        }
+
+        .sidebar .brand {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar .brand h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sidebar .nav-link {
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            margin: 3px 10px;
+            font-size: 0.9rem;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: var(--text-primary);
+            background-color: rgba(255, 165, 67, 0.15);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--orange);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            min-height: 100vh;
+            width: calc(100% - 240px);
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h5 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar-header {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .content-wrapper {
+            padding: 1.25rem;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .page-header {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        .search-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(255, 165, 67, 0.08);
+            transition: background-color 0.2s ease;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--cyan), var(--orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        .status-inactive {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-admin {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .role-stock-manager {
+            background-color: rgba(0, 217, 255, 0.2);
+            color: var(--cyan);
+        }
+
+        .role-sales-staff {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        .role-hr-staff {
+            background-color: rgba(251, 191, 36, 0.2);
+            color: var(--yellow);
+        }
+
+        .role-marketing-manager {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .form-control, .form-select {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--orange);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(255, 159, 67, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-group-text {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), #ff6b35);
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 159, 67, 0.3);
+        }
+
+        .btn-outline-secondary {
+            background: rgba(108, 117, 125, 0.15);
+            border: 1px solid #6c757d;
+            color: #a8b0ba;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(108, 117, 125, 0.25);
+            border-color: #8c959e;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-outline-primary {
+            background: rgba(33, 150, 243, 0.15);
+            border: 1px solid #2196F3;
+            color: #2196F3;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary:hover {
+            background: rgba(33, 150, 243, 0.25);
+            border-color: #2196F3;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline-info {
+            background: rgba(33, 150, 243, 0.15);
+            border: 1px solid #2196F3;
+            color: #2196F3;
+            font-weight: 500;
+        }
+
+        .btn-outline-info:hover {
+            background: rgba(33, 150, 243, 0.25);
+            border-color: #2196F3;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-outline-warning {
+            background: rgba(255, 159, 67, 0.15);
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            font-weight: 500;
+        }
+
+        .btn-outline-warning:hover {
+            background: rgba(255, 159, 67, 0.25);
+            border-color: var(--orange);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(255, 159, 67, 0.3);
+        }
+
+        .btn-outline-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--red);
+            color: var(--red);
+            font-weight: 500;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: var(--red);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .pagination-wrapper {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .pagination .page-link {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            margin: 0 2px;
+            border-radius: 6px;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--bg-card);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--orange), #ff6b35);
+            border-color: var(--orange);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--border-color);
+            opacity: 0.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: 1px solid;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                min-height: auto;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .header {
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="brand">
+                <h4>
+                    <i class="fas fa-boxes"></i> Stock Management
+                </h4>
+            </div>
+            <ul class="nav flex-column py-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/users">
+                        <i class="fas fa-users"></i> User Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/suppliers">
+                        <i class="fas fa-truck"></i> Supplier Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/staff">
+                        <i class="fas fa-user-tie"></i> Staff Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/customers">
+                        <i class="fas fa-user-friends"></i> Customers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/bills">
+                        <i class="fas fa-file-invoice-dollar"></i> Bills
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/items/dashboard">
+                        <i class="fas fa-warehouse"></i> Inventory
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/promotions">
+                        <i class="fas fa-tags"></i> Promotions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/discounts">
+                        <i class="fas fa-percent"></i> Discounts
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <div th:if="${_csrf != null}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        </div>
+                        <button type="submit" class="nav-link border-0 bg-transparent text-start w-100">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h5>User Management</h5>
+                <div class="user-info">
+                    <span>Welcome, <strong>admin</strong></span>
+                    <div class="user-avatar-header">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2><i class="fas fa-users" style="color: var(--orange);"></i> User Management</h2>
+                            <p>Manage system users and their permissions</p>
+                        </div>
+                        <div>
+                            <a href="/admin/dashboard" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <a href="/users/create" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add New User
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="search-box">
+                    <form method="get" th:action="@{/users}">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" name="search" th:value="${search}"
+                                           placeholder="Search users...">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="size">
+                                    <option value="10" th:selected="${size == 10}">10 per page</option>
+                                    <option value="25" th:selected="${size == 25}">25 per page</option>
+                                    <option value="50" th:selected="${size == 50}">50 per page</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="sort">
+                                    <option value="createdAt" th:selected="${sort == 'createdAt'}">Created Date</option>
+                                    <option value="username" th:selected="${sort == 'username'}">Username</option>
+                                    <option value="firstName" th:selected="${sort == 'firstName'}">First Name</option>
+                                    <option value="email" th:selected="${sort == 'email'}">Email</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="direction">
+                                    <option value="desc" th:selected="${direction == 'desc'}">Newest First</option>
+                                    <option value="asc" th:selected="${direction == 'asc'}">Oldest First</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-card" th:if="${users.hasContent()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users.content}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3" th:text="${user.initials}">JD</div>
+                                        <div>
+                                            <div class="fw-bold" th:text="${user.fullName}">John Doe</div>
+                                            <small class="text-muted" th:text="${user.username}">johndoe</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${user.email}">john@example.com</td>
+                                <td>
+                                <span class="role-badge"
+                                      th:classappend="${user.role != null ? 'role-' + user.role.name().toLowerCase().replace('_', '-') : 'role-admin'}"
+                                      th:text="${user.role != null ? user.role.name().replace('_', ' ') : 'UNKNOWN'}">ADMIN</span>
+                                </td>
+                                <td>
+                                <span class="status-badge"
+                                      th:classappend="${user.active ? 'status-active' : 'status-inactive'}"
+                                      th:text="${user.active ? 'Active' : 'Inactive'}">Active</span>
+                                </td>
+                                <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'MMM dd, yyyy') : '-'}">
+                                    Jan 01, 2024
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/users/{id}(id=${user.userId})}"
+                                           class="btn btn-outline-info btn-sm" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{/users/{id}/edit(id=${user.userId})}"
+                                           class="btn btn-outline-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/users/{id}/reset-password(id=${user.userId})}"
+                                           class="btn btn-outline-secondary btn-sm" title="Reset Password">
+                                            <i class="fas fa-key"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-primary btn-sm"
+                                                title="Toggle Status"
+                                                onclick="toggleUserStatus(this.dataset.userId, this.dataset.username)"
+                                                th:attr="data-user-id=${user.userId}, data-username=${user.username}">
+                                            <i class="fas fa-toggle-on" th:if="${user.active}"></i>
+                                            <i class="fas fa-toggle-off" th:unless="${user.active}"></i>
+                                        </button>
+                                        <button type="button"
+                                                th:class="${user.active} ? 'btn btn-outline-secondary btn-sm' : 'btn btn-outline-danger btn-sm'"
+                                                th:title="${user.active} ? 'Cannot delete active users' : 'Delete'"
+                                                th:onclick="deleteUser(this.dataset.userId, this.dataset.username, this.dataset.active)"
+                                                th:attr="data-user-id=${user.userId}, data-username=${user.username}, data-active=${user.active}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="table-card" th:unless="${users.hasContent()}">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h4>No Users Found</h4>
+                        <p>No users match your search criteria. Try adjusting your filters.</p>
+                        <a href="/users/create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create First User
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper" th:if="${users.hasContent() && users.totalPages > 1}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Showing <span th:text="${users.numberOfElements}">10</span> of
+                            <span th:text="${users.totalElements}">100</span> users
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${users.first} ? 'disabled' : ''">
+                                    <a class="page-link"
+                                       th:href="@{/users(page=0,size=${size},sort=${sort},direction=${direction},search=${search})}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:classappend="${users.first} ? 'disabled' : ''">
+                                    <a class="page-link"
+                                       th:href="@{/users(page=${users.number-1},size=${size},sort=${sort},direction=${direction},search=${search})}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+
+                                <li th:each="pageNum : ${#numbers.sequence(0, users.totalPages-1)}"
+                                    th:if="${pageNum >= currentPage - 2 && pageNum <= currentPage + 2}"
+                                    class="page-item" th:classappend="${pageNum == currentPage} ? 'active' : ''">
+                                    <a class="page-link"
+                                       th:href="@{/users(page=${pageNum},size=${size},sort=${sort},direction=${direction},search=${search})}"
+                                       th:text="${pageNum + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${users.last} ? 'disabled' : ''">
+                                    <a class="page-link"
+                                       th:href="@{/users(page=${users.number+1},size=${size},sort=${sort},direction=${direction},search=${search})}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:classappend="${users.last} ? 'disabled' : ''">
+                                    <a class="page-link"
+                                       th:href="@{/users(page=${users.totalPages-1},size=${size},sort=${sort},direction=${direction},search=${search})}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden forms for POST actions -->
+    <form id="toggleStatusForm" method="post" style="display: none;">
+        <div th:if="${_csrf != null}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        </div>
+        <input type="hidden" name="_method" value="post"/>
+        <input type="submit" style="display:none"/>
+
+    </form>
+
+    <form id="deleteForm" method="post" style="display: none;">
+        <div th:if="${_csrf != null}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        </div>
+        <input type="hidden" name="_method" value="post"/>
+        <input type="submit" style="display:none"/>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function toggleUserStatus(userId, username) {
+            Swal.fire({
+                title: 'Toggle User Status',
+                text: `Are you sure you want to toggle the status of user "${username}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3498db',
+                cancelButtonColor: '#95a5a6',
+                confirmButtonText: 'Yes, toggle it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('toggleStatusForm');
+                    form.action = `/users/${userId}/toggle-status`;
+                    form.submit();
+                }
+            });
+        }
+
+        // Prevent deletion of active users
+        function deleteUser(userId, username, isActive) {
+            const active = (isActive === true) || (String(isActive).toLowerCase() === 'true');
+            if (active) {
+                Swal.fire({
+                    title: 'Cannot Delete Active User',
+                    text: 'Active users cannot be deleted. Please deactivate the user first before deletion.',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Delete User',
+                text: `Are you sure you want to delete user "${username}"? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('deleteForm');
+                    form.action = `/users/${userId}/delete`;
+                    form.submit();
+                }
+            });
+        }
+
+        // Auto-submit search form on filter changes
+        document.querySelectorAll('select[name="size"], select[name="sort"], select[name="direction"]').forEach(select => {
+            select.addEventListener('change', function () {
+                this.form.submit();
+            });
+        });
+
+        // Clear search
+        function clearSearch() {
+            document.querySelector('input[name="search"]').value = '';
+            document.querySelector('form').submit();
+        }
+    </script>
+</body>
+</html>

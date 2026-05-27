@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<!-- Sidebar Fragment -->
+<div th:fragment="sidebar" class="sidebar">
+    <div class="brand">
+        <h4><i class="fas fa-boxes"></i> Stock Management</h4>
+    </div>
+
+    <nav class="nav flex-column mt-3">
+        <a class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}" href="/admin/dashboard">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'users' ? 'active' : ''}" href="/users">
+            <i class="fas fa-users"></i> User Management
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'suppliers' ? 'active' : ''}" href="/suppliers">
+            <i class="fas fa-truck"></i> Supplier Management
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'staff' ? 'active' : ''}" href="/staff">
+            <i class="fas fa-user-tie"></i> Staff Management
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'customers' ? 'active' : ''}" href="/customers">
+            <i class="fas fa-user-friends"></i> Customers
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'bills' ? 'active' : ''}" href="/bills">
+            <i class="fas fa-file-invoice-dollar"></i> Bills
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'inventory' ? 'active' : ''}" href="/items/dashboard">
+            <i class="fas fa-warehouse"></i> Inventory
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'promotions' ? 'active' : ''}" href="/promotions">
+            <i class="fas fa-tags"></i> Promotions
+        </a>
+
+        <a class="nav-link" th:classappend="${activeTab == 'discounts' ? 'active' : ''}" href="/discounts">
+            <i class="fas fa-percent"></i> Discounts
+        </a>
+
+        <a class="nav-link" href="/logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Details - Stock Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/form-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="bg-animation" id="bgAnimation"></div>
+
+<div class="container-fluid">
+    <div class="form-container">
+        <div class="form-header">
+            <div class="d-flex align-items-center">
+                <div class="user-view-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="form-header-content">
+                    <h2>Staff Member Details</h2>
+                    <p>View staff member information</p>
+                </div>
+            </div>
+            <a href="/staff" class="btn btn-secondary-modern">
+                <i class="fas fa-arrow-left me-2"></i>Back to Staff
+            </a>
+        </div>
+
+        <div class="info-card">
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div th:if="${staff.photoUrl}">
+                        <img th:src="@{'/uploads/' + ${staff.photoUrl}}" class="user-avatar mx-auto mb-3"
+                             alt="Staff Photo" style="object-fit: cover;">
+                    </div>
+                    <div th:unless="${staff.photoUrl}" class="user-avatar mx-auto mb-3">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h4 style="color: var(--text-light);" th:text="${staff.firstName + ' ' + staff.lastName}">John
+                        Doe</h4>
+                    <span class="badge" th:classappend="${staff.isActive} ? ' badge-success' : ' badge-danger'"
+                          th:text="${staff.isActive} ? 'Active' : 'Inactive'">Active</span>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-id-badge me-2"></i>Employee ID</div>
+                        <div class="info-value" th:text="${staff.employeeId}">EMP001</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-id-card me-2"></i>Full Name</div>
+                        <div class="info-value" th:text="${staff.firstName + ' ' + staff.lastName}">John Doe</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-envelope me-2"></i>Email</div>
+                        <div class="info-value" th:text="${staff.email}">john@example.com</div>
+                    </div>
+
+                    <div class="info-row" th:if="${staff.phone}">
+                        <div class="info-label"><i class="fas fa-phone me-2"></i>Phone</div>
+                        <div class="info-value" th:text="${staff.phone}">123-456-7890</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-user-tag me-2"></i>Role</div>
+                        <div class="info-value" th:text="${staff.role}">Sales Associate</div>
+                    </div>
+
+                    <div class="info-row" th:if="${staff.department}">
+                        <div class="info-label"><i class="fas fa-building me-2"></i>Department</div>
+                        <div class="info-value" th:text="${staff.department}">Sales</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-calendar me-2"></i>Hire Date</div>
+                        <div class="info-value" th:text="${#temporals.format(staff.hireDate, 'MMMM dd, yyyy')}">January
+                            01, 2024
+                        </div>
+                    </div>
+
+                    <div class="info-row" th:if="${staff.salary}">
+                        <div class="info-label"><i class="fas fa-dollar-sign me-2"></i>Salary</div>
+                        <div class="info-value"
+                             th:text="${'$' + #numbers.formatDecimal(staff.salary, 0, 'COMMA', 2, 'POINT')}">$50,000.00
+                        </div>
+                    </div>
+
+                    <div class="info-row" th:if="${staff.shiftSchedule}">
+                        <div class="info-label"><i class="fas fa-clock me-2"></i>Shift Schedule</div>
+                        <div class="info-value" th:text="${staff.shiftSchedule}">9 AM - 5 PM, Mon-Fri</div>
+                    </div>
+
+                    <div class="info-row" th:if="${staff.performanceRating}">
+                        <div class="info-label"><i class="fas fa-star me-2"></i>Performance Rating</div>
+                        <div class="info-value">
+                            <span th:text="${staff.performanceRating}">4.5</span>
+                            <span style="color: #ffc107;">
+                                <i class="fas fa-star" th:if="${staff.performanceRating >= 1}"></i>
+                                <i class="fas fa-star" th:if="${staff.performanceRating >= 2}"></i>
+                                <i class="fas fa-star" th:if="${staff.performanceRating >= 3}"></i>
+                                <i class="fas fa-star" th:if="${staff.performanceRating >= 4}"></i>
+                                <i class="fas fa-star" th:if="${staff.performanceRating >= 5}"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a th:href="@{/staff/edit/{id}(id=${staff.id})}" class="btn btn-modern">
+                <i class="fas fa-edit me-2"></i>Edit Staff
+            </a>
+            <a href="/staff" class="btn btn-secondary-modern">
+                <i class="fas fa-list me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

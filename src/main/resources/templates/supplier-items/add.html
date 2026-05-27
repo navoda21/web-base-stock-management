@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Supplier-Item Relationship - Stock Management System</title>
+
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+
+    <style>
+        :root {
+            --bg-primary: #1a1d29;
+            --bg-secondary: #2d3142;
+            --bg-card: #252837;
+            --cyan: #f9fafa;
+            --orange: #ff9f43;
+            --green: #10b981;
+            --red: #ef4444;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: #3d4252;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 25px;
+            max-width: 900px;
+        }
+
+        .header-section {
+            margin-bottom: 25px;
+        }
+
+        .header-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--orange);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(255, 159, 67, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-check-input {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--orange);
+            border-color: var(--orange);
+        }
+
+        .form-check-label {
+            color: var(--text-primary);
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--orange), #ff6b35);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 159, 67, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="header-section">
+        <div>
+            <a th:href="@{/supplier-items}" class="btn-secondary mb-3">
+                <i class="fas fa-arrow-left me-2"></i>Back to Relationships
+            </a>
+            <h2><i class="fas fa-link me-2"></i>Add Supplier-Item Relationship</h2>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Form -->
+    <div class="card">
+        <div class="card-body p-4">
+            <form th:action="@{/supplier-items/add}" method="post">
+                <div class="row">
+                    <!-- Supplier Selection -->
+                    <div class="col-md-6 mb-3">
+                        <label for="supplierId" class="form-label">
+                            <i class="fas fa-building me-2 text-warning"></i>Supplier *
+                        </label>
+                        <select class="form-select" id="supplierId" name="supplierId" required>
+                            <option value="">-- Select Supplier --</option>
+                            <option th:each="supplier : ${suppliers}"
+                                    th:value="${supplier.id}"
+                                    th:text="${supplier.name}"
+                                    th:selected="${preSelectedSupplierId != null && preSelectedSupplierId == supplier.id}">
+                                Supplier Name
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Item Selection -->
+                    <div class="col-md-6 mb-3">
+                        <label for="itemId" class="form-label">
+                            <i class="fas fa-box me-2 text-info"></i>Item *
+                        </label>
+                        <select class="form-select" id="itemId" name="itemId" required>
+                            <option value="">-- Select Item --</option>
+                            <option th:each="item : ${items}"
+                                    th:value="${item.id}"
+                                    th:text="${item.name}"
+                                    th:selected="${preSelectedItemId != null && preSelectedItemId == item.id}">
+                                Item Name
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Supplied Quantity -->
+                    <div class="col-md-6 mb-3">
+                        <label for="suppliedQuantity" class="form-label">
+                            <i class="fas fa-boxes me-2 text-success"></i>Supplied Quantity *
+                        </label>
+                        <input type="number" class="form-control" id="suppliedQuantity"
+                               name="suppliedQuantity" min="1" max="1000000" required
+                               placeholder="Enter quantity (1-1,000,000)">
+                        <div class="invalid-feedback">
+                            Please enter a quantity between 1 and 1,000,000
+                        </div>
+                    </div>
+
+                    <!-- Supply Price -->
+                    <div class="col-md-6 mb-3">
+                        <label for="supplyPrice" class="form-label">
+                            <i class="fas fa-dollar-sign me-2 text-success"></i>Supply Price *
+                        </label>
+                        <input type="number" class="form-control" id="supplyPrice"
+                               name="supplyPrice" step="0.01" min="0.01" max="999999.99" required
+                               placeholder="Enter price (0.01-999,999.99)">
+                        <div class="invalid-feedback">
+                            Please enter a valid price between $0.01 and $999,999.99
+                        </div>
+                    </div>
+
+                    <!-- Lead Time -->
+                    <div class="col-md-6 mb-3">
+                        <label for="leadTimeDays" class="form-label">
+                            <i class="fas fa-clock me-2 text-info"></i>Lead Time (days)
+                        </label>
+                        <input type="number" class="form-control" id="leadTimeDays"
+                               name="leadTimeDays" min="0" max="365"
+                               placeholder="Enter lead time (0-365 days)">
+                        <div class="invalid-feedback">
+                            Lead time must be between 0 and 365 days
+                        </div>
+                    </div>
+
+                    <!-- Minimum Order Quantity -->
+                    <div class="col-md-6 mb-3">
+                        <label for="minOrderQuantity" class="form-label">
+                            <i class="fas fa-sort-numeric-down me-2 text-warning"></i>Minimum Order Quantity
+                        </label>
+                        <input type="number" class="form-control" id="minOrderQuantity"
+                               name="minOrderQuantity" min="1" max="100000"
+                               placeholder="Enter minimum order (1-100,000)">
+                        <div class="invalid-feedback">
+                            Minimum order must be between 1 and 100,000
+                        </div>
+                    </div>
+
+                    <!-- Primary Supplier Checkbox -->
+                    <div class="col-12 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   id="isPrimarySupplier" name="isPrimarySupplier" value="true">
+                            <label class="form-check-label" for="isPrimarySupplier">
+                                <i class="fas fa-star me-2 text-warning"></i>
+                                Mark as Primary Supplier for this item
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-12 mb-3">
+                        <label for="notes" class="form-label">
+                            <i class="fas fa-sticky-note me-2 text-secondary"></i>Notes
+                        </label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
+                                  maxlength="500"
+                                  placeholder="Enter any additional notes (max 500 characters)"></textarea>
+                        <small style="color: var(--text-primary);">
+                            <span id="charCount">0</span>/500 characters
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a th:href="@{/supplier-items}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-custom">
+                        <i class="fas fa-save me-2"></i>Save Relationship
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Form Validation Script -->
+<script>
+    // Character counter for notes
+    const notesField = document.getElementById('notes');
+    const charCount = document.getElementById('charCount');
+
+    notesField.addEventListener('input', function () {
+        charCount.textContent = this.value.length;
+    });
+
+    // Form validation
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', function (event) {
+        let isValid = true;
+        let errorMessages = [];
+
+        // Validate Supplier
+        const supplierId = document.getElementById('supplierId').value;
+        if (!supplierId) {
+            isValid = false;
+            errorMessages.push('Please select a supplier');
+            document.getElementById('supplierId').classList.add('is-invalid');
+        } else {
+            document.getElementById('supplierId').classList.remove('is-invalid');
+        }
+
+        // Validate Item
+        const itemId = document.getElementById('itemId').value;
+        if (!itemId) {
+            isValid = false;
+            errorMessages.push('Please select an item');
+            document.getElementById('itemId').classList.add('is-invalid');
+        } else {
+            document.getElementById('itemId').classList.remove('is-invalid');
+        }
+
+        // Validate Supplied Quantity
+        const suppliedQuantity = parseInt(document.getElementById('suppliedQuantity').value);
+        if (!suppliedQuantity || suppliedQuantity < 1 || suppliedQuantity > 1000000) {
+            isValid = false;
+            errorMessages.push('Supplied quantity must be between 1 and 1,000,000');
+            document.getElementById('suppliedQuantity').classList.add('is-invalid');
+        } else {
+            document.getElementById('suppliedQuantity').classList.remove('is-invalid');
+        }
+
+        // Validate Supply Price
+        const supplyPrice = parseFloat(document.getElementById('supplyPrice').value);
+        if (!supplyPrice || supplyPrice < 0.01 || supplyPrice > 999999.99) {
+            isValid = false;
+            errorMessages.push('Supply price must be between $0.01 and $999,999.99');
+            document.getElementById('supplyPrice').classList.add('is-invalid');
+        } else {
+            document.getElementById('supplyPrice').classList.remove('is-invalid');
+        }
+
+        // Validate Lead Time (optional but if provided must be valid)
+        const leadTimeDays = document.getElementById('leadTimeDays').value;
+        if (leadTimeDays !== '' && (parseInt(leadTimeDays) < 0 || parseInt(leadTimeDays) > 365)) {
+            isValid = false;
+            errorMessages.push('Lead time must be between 0 and 365 days');
+            document.getElementById('leadTimeDays').classList.add('is-invalid');
+        } else {
+            document.getElementById('leadTimeDays').classList.remove('is-invalid');
+        }
+
+        // Validate Min Order Quantity (optional but if provided must be valid)
+        const minOrderQuantity = document.getElementById('minOrderQuantity').value;
+        if (minOrderQuantity !== '' && (parseInt(minOrderQuantity) < 1 || parseInt(minOrderQuantity) > 100000)) {
+            isValid = false;
+            errorMessages.push('Minimum order quantity must be between 1 and 100,000');
+            document.getElementById('minOrderQuantity').classList.add('is-invalid');
+        } else {
+            document.getElementById('minOrderQuantity').classList.remove('is-invalid');
+        }
+
+        // Validate Min Order vs Supplied Quantity
+        if (minOrderQuantity && suppliedQuantity && parseInt(minOrderQuantity) > parseInt(suppliedQuantity)) {
+            isValid = false;
+            errorMessages.push('Minimum order quantity cannot be greater than supplied quantity');
+            document.getElementById('minOrderQuantity').classList.add('is-invalid');
+        }
+
+        // Validate Notes length
+        const notes = document.getElementById('notes').value;
+        if (notes.length > 500) {
+            isValid = false;
+            errorMessages.push('Notes cannot exceed 500 characters');
+            document.getElementById('notes').classList.add('is-invalid');
+        } else {
+            document.getElementById('notes').classList.remove('is-invalid');
+        }
+
+        // If validation fails, prevent submission and show errors
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Show error message
+            alert('Please fix the following errors:\n\n' + errorMessages.join('\n'));
+        }
+
+        form.classList.add('was-validated');
+    });
+
+    // Real-time validation feedback
+    document.getElementById('supplyPrice').addEventListener('input', function () {
+        const value = parseFloat(this.value);
+        if (value > 10000) {
+            if (!confirm('Warning: The supply price seems very high ($' + value.toFixed(2) + '). Is this correct?')) {
+                this.value = '';
+            }
+        }
+    });
+
+    document.getElementById('suppliedQuantity').addEventListener('input', function () {
+        const value = parseInt(this.value);
+        if (value > 50000) {
+            if (!confirm('Warning: The supplied quantity is very high (' + value + '). Is this correct?')) {
+                this.value = '';
+            }
+        }
+    });
+</script>
+</body>
+</html>

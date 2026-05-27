@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier-Item Relationships - Stock Management System</title>
+
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+
+    <style>
+        :root {
+            --bg-primary: #1a1d29;
+            --bg-secondary: #2d3142;
+            --bg-card: #252837;
+            --cyan: #f9fafa;
+            --orange: #ff9f43;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: #3d4252;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 25px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--orange), #ff6b35);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 159, 67, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: var(--bg-secondary);
+            color: var(--orange);
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 600;
+            padding: 12px;
+        }
+
+        .table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(255, 159, 67, 0.05);
+        }
+
+        .badge-primary {
+            background-color: var(--orange);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .badge-success {
+            background-color: var(--green);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background-color: var(--yellow);
+            color: #1a1d29;
+        }
+
+        .btn-delete {
+            background-color: var(--red);
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="header-section">
+        <div>
+            <a href="/suppliers" class="btn btn-secondary mb-3">
+                <i class="fas fa-arrow-left me-2"></i>Back to Suppliers
+            </a>
+            <h2><i class="fas fa-link me-2"></i>Supplier-Item Relationships</h2>
+        </div>
+        <a th:href="@{/supplier-items/add}" class="btn btn-custom">
+            <i class="fas fa-plus me-2"></i>Add New Relationship
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Supplier-Item Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Supplier</th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Supply Price</th>
+                        <th>Primary</th>
+                        <th>Lead Time</th>
+                        <th>Min Order</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(supplierItems)}">
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                            <p class="text-secondary">No supplier-item relationships found.</p>
+                            <a th:href="@{/supplier-items/add}" class="btn btn-custom mt-2">
+                                <i class="fas fa-plus me-2"></i>Add First Relationship
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:each="si : ${supplierItems}">
+                        <td th:text="${si.id}">1</td>
+                        <td>
+                            <i class="fas fa-building me-2 text-warning"></i>
+                            <span th:text="${si.supplier.name}">Supplier Name</span>
+                        </td>
+                        <td>
+                            <i class="fas fa-box me-2 text-info"></i>
+                            <span th:text="${si.item.name}">Item Name</span>
+                        </td>
+                        <td>
+                            <span class="badge-primary" th:text="${si.suppliedQuantity}">100</span>
+                        </td>
+                        <td th:text="${si.supplyPrice != null ? '$' + si.supplyPrice : 'N/A'}">$10.00</td>
+                        <td>
+                                    <span th:if="${si.isPrimarySupplier}" class="badge-success">
+                                        <i class="fas fa-star me-1"></i>Primary
+                                    </span>
+                            <span th:unless="${si.isPrimarySupplier}" class="text-secondary">-</span>
+                        </td>
+                        <td th:text="${si.leadTimeDays != null ? si.leadTimeDays + ' days' : 'N/A'}">5 days</td>
+                        <td th:text="${si.minOrderQuantity != null ? si.minOrderQuantity : 'N/A'}">10</td>
+                        <td>
+                            <a th:href="@{/supplier-items/edit/{id}(id=${si.id})}"
+                               class="btn btn-action btn-edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a th:href="@{/supplier-items/delete/{id}(id=${si.id})}"
+                               class="btn btn-action btn-delete"
+                               onclick="return confirm('Are you sure you want to delete this relationship?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
